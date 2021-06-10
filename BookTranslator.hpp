@@ -10,6 +10,12 @@ class BookTranslator : public QMainWindow
 public:
     BookTranslator(QWidget *parent = Q_NULLPTR);
 
+    bool openFB2File(QString& path);
+
 private:
+    QString book;
+    QString imgId;
+    QString imgType;
+
     Ui::BookTranslatorClass ui;
 };
