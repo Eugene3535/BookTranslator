@@ -1,11 +1,12 @@
-#include "Book.hpp"
-#include <QtWidgets/QApplication>
+#include "MainWindow.hpp"
 
-int main(int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
-    QApplication a(argc, argv);
-    Book book;
-    book.show();
-	
-    return a.exec();
+    QApplication app(argc, argv);
+
+    MainWindow window;
+    window.show();
+
+    return app.exec();
 }
