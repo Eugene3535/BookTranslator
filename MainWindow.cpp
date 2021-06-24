@@ -3,11 +3,16 @@
 #include <QMenu>
 #include <QMenuBar>
 
+#include <QTextStream>
+#include <QFile>
+#include <QFileDialog>
+
 MainWindow::MainWindow(QMainWindow* parent)
 	: QMainWindow(parent)
 {
 	resize(800, 600);
 
+	// File menu
 	QPixmap open_icon("images/open.png");
 	QPixmap save_icon("images/save.png");
 	QPixmap quit_icon("images/quit.png");
@@ -24,6 +29,7 @@ MainWindow::MainWindow(QMainWindow* parent)
 	file_menu->addSeparator();
 	file_menu->addAction(quit);
 
+	// Language menu
 	QPixmap russian_icon("images/russia.png");
 	QPixmap usa_icon("images/usa.png");
 	
@@ -42,4 +48,41 @@ MainWindow::MainWindow(QMainWindow* parent)
 	qApp->setAttribute(Qt::AA_DontShowIconsInMenus, false);
 
 	connect(quit, &QAction::triggered, qApp, &QApplication::quit);
+	connect(open, &QAction::triggered, this, &MainWindow::open_fb2);
+}
+
+void MainWindow::open_fb2()
+{
+	QString file_path = QFileDialog::getOpenFileName(this, "open", QDir::currentPath(), "");
+
+	if (file_path.isEmpty())
+		return;
+
+	if (file_path.endsWith(".fb2"))
+	{
+		QFile file(file_path);
+
+		if (file.open(QIODevice::ReadWrite | QIODevice::Text))
+		{
+			write_log("Sucsess!");
+		}
+	}
+
+}
+
+void MainWindow::write_log(const QString& info)
+{
+	QTextStream out(stdout);
+	QString filename = "D://Projects/Qt/BookTranslator/BookTranslator/loginfo/log.txt";
+	QFile file(filename);
+
+	if (file.open(QIODevice::WriteOnly)) 
+	{
+		QTextStream out(&file); 
+		out << info << endl;		
+	}
+	else 
+		qWarning("Could not open file");
+	
+	file.close();
 }

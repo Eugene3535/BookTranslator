@@ -11,6 +11,7 @@ class MainWindow :
 public:
     MainWindow(QMainWindow* parent = 0);
 
-    
+    void open_fb2();
 
+    void write_log(const QString& info);
 };
