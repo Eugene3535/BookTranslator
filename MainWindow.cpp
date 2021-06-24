@@ -8,24 +8,36 @@ MainWindow::MainWindow(QMainWindow* parent)
 {
 	resize(800, 600);
 
-	QPixmap openpix("images/open.png");
-	QPixmap savepix("images/save.png");
-	QPixmap quitpix("images/close.png");
+	QPixmap open_icon("images/open.png");
+	QPixmap save_icon("images/save.png");
+	QPixmap quit_icon("images/quit.png");
 
-	QAction* open = new QAction(openpix, "&Open", this);
-	QAction* save = new QAction(savepix, "&Save", this);
-	QAction* quit = new QAction(quitpix, "&Quit", this);
+	QAction* open = new QAction(open_icon, "&Open", this);
+	QAction* save = new QAction(save_icon, "&Save", this);
+	QAction* quit = new QAction(quit_icon, "&Quit", this);
 
+	QMenu* file_menu;
+	file_menu = menuBar()->addMenu("&File");
+	file_menu->addAction(open);
+	file_menu->addSeparator();
+	file_menu->addAction(save);
+	file_menu->addSeparator();
+	file_menu->addAction(quit);
+
+	QPixmap russian_icon("images/russia.png");
+	QPixmap usa_icon("images/usa.png");
+	
+	QAction* russian = new QAction(russian_icon, "&Russian", this);
+	QAction* usa = new QAction(usa_icon, "&USA", this);
+
+	QMenu* language_menu;
+	language_menu = menuBar()->addMenu("&Language");
+	language_menu->addAction(russian);
+	language_menu->addSeparator();
+	language_menu->addAction(usa);
+	
 	// TODO: mb, need to add a shortcuts ?
-	//quit->setShortcut(tr("CTRL+Q"));
-
-	QMenu* file;
-	file = menuBar()->addMenu("&File");
-	file->addAction(open); 
-	file->addSeparator();
-	file->addAction(save);
-	file->addSeparator();
-	file->addAction(quit); 
+	//quit->setShortcut(tr("CTRL+Q"));	
 	
 	qApp->setAttribute(Qt::AA_DontShowIconsInMenus, false);
 
