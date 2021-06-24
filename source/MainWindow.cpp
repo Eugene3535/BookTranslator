@@ -2,10 +2,11 @@
 
 #include <QMenu>
 #include <QMenuBar>
-
 #include <QTextStream>
 #include <QFile>
 #include <QFileDialog>
+//#include "QtXml/QtXml"
+//#include <QStringList>
 
 MainWindow::MainWindow(QMainWindow* parent)
 	: QMainWindow(parent)
@@ -49,6 +50,11 @@ MainWindow::MainWindow(QMainWindow* parent)
 
 	connect(quit, &QAction::triggered, qApp, &QApplication::quit);
 	connect(open, &QAction::triggered, this, &MainWindow::open_fb2);
+
+	//m_text_browser.setParent(this);
+	//m_text_browser.clear();
+	//m_text_browser.setFontPointSize(16);
+	//m_text_browser.setFontUnderline(false);
 }
 
 void MainWindow::open_fb2()
@@ -65,6 +71,9 @@ void MainWindow::open_fb2()
 		if (file.open(QIODevice::ReadWrite | QIODevice::Text))
 		{
 			write_log("Sucsess!");
+
+			// hide(); Важно помнить, что процесс остаётся висеть в реестре!!!
+			// show(); Вызвать при закрытии вспомогательного окна!
 		}
 	}
 
