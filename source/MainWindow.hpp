@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QTextBrowser>
 
 class MainWindow :
     public QMainWindow
@@ -15,4 +16,5 @@ public:
 
 private:
     QLabel m_title;
+    QTextBrowser m_browser;
 };

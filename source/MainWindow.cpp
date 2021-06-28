@@ -7,14 +7,17 @@
 #include <QTextStream>
 #include <QFile>
 #include <QFileDialog>
-//#include "QtXml/QtXml"
-//#include <QStringList>
+
+#include "QtXml/QtXml"
+#include <QStringlist>
 
 MainWindow::MainWindow(QMainWindow* parent):
 	QMainWindow(parent)
 {
-	resize(600, 480);
+	// Title settings
+	resize(1200, 720);
 	setWindowIcon(QIcon("images/book.png"));
+	setCentralWidget(&m_browser);
 
 	// File menu
 	QPixmap open_icon("images/open.png");
@@ -50,11 +53,6 @@ MainWindow::MainWindow(QMainWindow* parent):
 
 	connect(quit, &QAction::triggered, qApp, &QApplication::quit);
 	connect(open, &QAction::triggered, this, &MainWindow::open_fb2);
-
-	QPixmap book_title("images/book_title.png");
-	m_title.setParent(this);
-	m_title.setPixmap(book_title);
-	setCentralWidget(&m_title);
 }
 
 void MainWindow::open_fb2()
@@ -70,10 +68,75 @@ void MainWindow::open_fb2()
 
 		if (file.open(QIODevice::ReadWrite | QIODevice::Text))
 		{
-			write_log("Sucsess!");
+			//write_log("Sucsess!");
 
 			// hide(); Важно помнить, что процесс остаётся висеть в реестре!!!
 			// show(); Вызвать при закрытии вспомогательного окна!
+
+			QXmlStreamReader sr(&file);
+			QString book;
+			QString imgId;
+			QString imgType;
+			QStringList thisToken;
+
+			while (!sr.atEnd())
+			{
+				switch (sr.readNext())
+				{
+				case QXmlStreamReader::NoToken:
+					qDebug() << "QXmlStreamReader::NoToken";
+					break;
+				case QXmlStreamReader::StartDocument:
+					book = "<!DOCTYPE HTML><html><body style=\"font-size:14px\">";
+					break;
+				case QXmlStreamReader::EndDocument:
+					book.append("</body></html>");
+					break;
+				case QXmlStreamReader::StartElement:
+					thisToken.append(sr.name().toString());
+					if (sr.name().toString() == "image") // расположение рисунков
+					{
+						if (sr.attributes().count() > 0)
+							book.append("<p align=\"center\">" + sr.attributes().at(0).value().toString() + "</p>");
+					}
+					if (sr.name() == "binary") // хранилище рисунков
+					{
+						imgId = sr.attributes().at(0).value().toString();
+						imgType = sr.attributes().at(1).value().toString();
+					}
+					break;
+				case QXmlStreamReader::EndElement:
+					if (thisToken.last() == sr.name().toString())
+						thisToken.removeLast();
+					else
+						qDebug() << "error token";
+					break;
+				case QXmlStreamReader::Characters:
+					if (sr.text().toString().contains(QRegExp("[A-Z]|[a-z]|[А-Я]|[а-я]"))) // если есть текст в блоке
+					{
+						if (thisToken.contains("description")) // ОПИСАНИЕ КНИГИ
+						{
+							break; // не выводим
+						}
+						if (thisToken.contains("div"))
+							break;
+						if (!thisToken.contains("binary"))
+							book.append("<p>" + sr.text().toString() + "</p>");
+					}
+					if (thisToken.contains("binary"))//для рисунков
+					{
+						QString image = "<img src=\"data:"
+							+ imgType + ";base64,"
+							+ sr.text().toString()
+							+ "\"/>";
+						book.replace("#" + imgId, image);
+					}
+					break;
+				}
+			}
+			file.close();
+			m_browser.setHtml(book);
+			m_browser.setVerticalScrollBar(0);
 		}
 	}
 
