@@ -1,17 +1,20 @@
 #include "MainWindow.hpp"
 
+#include <QApplication>
 #include <QMenu>
 #include <QMenuBar>
+#include <QString>
 #include <QTextStream>
 #include <QFile>
 #include <QFileDialog>
 //#include "QtXml/QtXml"
 //#include <QStringList>
 
-MainWindow::MainWindow(QMainWindow* parent)
-	: QMainWindow(parent)
+MainWindow::MainWindow(QMainWindow* parent):
+	QMainWindow(parent)
 {
-	resize(800, 600);
+	resize(600, 480);
+	setWindowIcon(QIcon("images/book.png"));
 
 	// File menu
 	QPixmap open_icon("images/open.png");
@@ -43,18 +46,15 @@ MainWindow::MainWindow(QMainWindow* parent)
 	language_menu->addSeparator();
 	language_menu->addAction(usa);
 	
-	// TODO: mb, need to add a shortcuts ?
-	//quit->setShortcut(tr("CTRL+Q"));	
-	
 	qApp->setAttribute(Qt::AA_DontShowIconsInMenus, false);
 
 	connect(quit, &QAction::triggered, qApp, &QApplication::quit);
 	connect(open, &QAction::triggered, this, &MainWindow::open_fb2);
 
-	//m_text_browser.setParent(this);
-	//m_text_browser.clear();
-	//m_text_browser.setFontPointSize(16);
-	//m_text_browser.setFontUnderline(false);
+	QPixmap book_title("images/book_title.png");
+	m_title.setParent(this);
+	m_title.setPixmap(book_title);
+	setCentralWidget(&m_title);
 }
 
 void MainWindow::open_fb2()
