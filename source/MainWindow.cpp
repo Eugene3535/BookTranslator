@@ -68,93 +68,75 @@ void MainWindow::open_fb2()
 
 		if (file.open(QIODevice::ReadWrite | QIODevice::Text))
 		{
-			//write_log("Sucsess!");
-
-			// hide(); Важно помнить, что процесс остаётся висеть в реестре!!!
-			// show(); Вызвать при закрытии вспомогательного окна!
-
-			QXmlStreamReader sr(&file);
+			QXmlStreamReader reader(&file);
 			QString book;
 			QString imgId;
 			QString imgType;
 			QStringList thisToken;
 
-			while (!sr.atEnd())
+			while (!reader.atEnd())
 			{
-				switch (sr.readNext())
+				switch (reader.readNext())
 				{
 				case QXmlStreamReader::NoToken:
 					qDebug() << "QXmlStreamReader::NoToken";
 					break;
+
 				case QXmlStreamReader::StartDocument:
 					book = "<!DOCTYPE HTML><html><body style=\"font-size:14px\">";
 					break;
+
 				case QXmlStreamReader::EndDocument:
 					book.append("</body></html>");
 					break;
+
 				case QXmlStreamReader::StartElement:
-					thisToken.append(sr.name().toString());
-					if (sr.name().toString() == "image") // расположение рисунков
+					thisToken.append(reader.name().toString());
+
+					if (reader.name().toString() == "image") // расположение рисунков
 					{
-						if (sr.attributes().count() > 0)
-							book.append("<p align=\"center\">" + sr.attributes().at(0).value().toString() + "</p>");
+						if (reader.attributes().count() > 0)
+							book.append("<p align=\"center\">" + reader.attributes().at(0).value().toString() + "</p>");
 					}
-					if (sr.name() == "binary") // хранилище рисунков
+					if (reader.name() == "binary") // хранилище рисунков
 					{
-						imgId = sr.attributes().at(0).value().toString();
-						imgType = sr.attributes().at(1).value().toString();
+						imgId = reader.attributes().at(0).value().toString();
+						imgType = reader.attributes().at(1).value().toString();
 					}
 					break;
+
 				case QXmlStreamReader::EndElement:
-					if (thisToken.last() == sr.name().toString())
+					if (thisToken.last() == reader.name().toString())
 						thisToken.removeLast();
 					else
 						qDebug() << "error token";
 					break;
+
 				case QXmlStreamReader::Characters:
-					if (sr.text().toString().contains(QRegExp("[A-Z]|[a-z]|[А-Я]|[а-я]"))) // если есть текст в блоке
+					if (reader.text().toString().contains(QRegExp("[A-Z]|[a-z]|[А-Я]|[а-я]"))) // если есть текст в блоке
 					{
-						if (thisToken.contains("description")) // ОПИСАНИЕ КНИГИ
-						{
+						if (thisToken.contains("description")) // ОПИСАНИЕ КНИГИ					
 							break; // не выводим
-						}
+						
 						if (thisToken.contains("div"))
 							break;
+
 						if (!thisToken.contains("binary"))
-							book.append("<p>" + sr.text().toString() + "</p>");
+							book.append("<p>" + reader.text().toString() + "</p>");
 					}
+
 					if (thisToken.contains("binary"))//для рисунков
 					{
-						QString image = "<img src=\"data:"
-							+ imgType + ";base64,"
-							+ sr.text().toString()
-							+ "\"/>";
+						QString image = "<img src=\"data:" + imgType + ";base64," + reader.text().toString() + "\"/>";
 						book.replace("#" + imgId, image);
 					}
 					break;
 				}
 			}
 			file.close();
+
 			m_browser.setHtml(book);
 			m_browser.setVerticalScrollBar(0);
 		}
 	}
-
-}
-
-void MainWindow::write_log(const QString& info)
-{
-	QTextStream out(stdout);
-	QString filename = "D://Projects/Qt/BookTranslator/BookTranslator/loginfo/log.txt";
-	QFile file(filename);
-
-	if (file.open(QIODevice::WriteOnly)) 
-	{
-		QTextStream out(&file); 
-		out << info << endl;		
-	}
-	else 
-		qWarning("Could not open file");
-	
-	file.close();
 }
